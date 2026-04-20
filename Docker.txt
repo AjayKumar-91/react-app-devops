@@ -1,0 +1,16 @@
+# 1. Clone & Run React App
+git clone https://github.com/sriram-R-krishnan/devops-build.git
+cd devops-build
+
+npm install -g serve
+serve -s . -l 80
+sudo serve -s . -l 80
+
+# Run Application on Port 80
+docker build -t react-devops-app .
+docker run -d -p 80:80 --name react-container react-devops-app
+
+# Run Application on Port 80 Dockerfile.multistage
+docker build -f Dockerfile.multistage -t react-devops-app .
+docker run -d -p 80:80 --name react-container react-devops-app
+

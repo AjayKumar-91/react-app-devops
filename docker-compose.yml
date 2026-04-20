@@ -1,25 +1,93 @@
 services:
   react-app:
-    container_name: react-container
-
+    container_name: react-dev-container
     build:
-      context: . # current directory
+      context: . 
       dockerfile: Dockerfile
-
-    image: ajaykumar91/react-app-dev   # tagging for reuse
+    image: ajaykumar91/react-app-dev
     ports:
       - "80:80"
-
-    restart: unless-stopped         # auto restart if crashed
-
-    healthcheck:                    # monitoring ready
+    restart: always
+    networks:
+      - react-app-nw
+    healthcheck: 
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 30s
       timeout: 10s
       retries: 3
-
-    logging:                        # log control
+    logging:                        
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+
+  react-app-prod:
+    container_name: react-prod-container
+    build:
+      context: . 
+      dockerfile: Dockerfile
+    image: ajaykumar91/react-app-prod
+    ports:
+      - "80:80"
+    restart: unless-stopped 
+    healthcheck: 
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:                        
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"  
+  
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./data/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./data/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+    networks:
+      - react-app-nw
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - react-app-nw
+    restart: unless-stopped 
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    expose:
+      - 9100
+    networks:
+      - react-app-nw    
+
+networks:
+  react-app-nw:
+    driver: bridge
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}            
