@@ -8,9 +8,52 @@ sudo serve -s . -l 80
 
 # Run Application on Port 80
 docker build -t react-devops-app .
-docker run -d -p 80:80 --name react-container react-devops-app
+docker run -d -p 80:80 --name react-app-container react-devops-app
 
 # Run Application on Port 80 Dockerfile.multistage
 docker build -f Dockerfile.multistage -t react-devops-app .
-docker run -d -p 80:80 --name react-container react-devops-app
+docker run -d -p 80:80 --name react-app-container react-devops-app
 
+# Run Application on Port 80 Docker Compose
+rm -rf ~/.docker/config.json
+docker logout
+docker login
+docker compose up -d --build
+docker compose down
+
+
+docker compose down -v
+docker compose up -d --build
+
+docker compose down -v --remove-orphans
+docker compose up -d --build
+
+# Check if custom config is mounted
+docker inspect 7345bd0e9d35 | grep -i grafana.ini
+
+# Check environment variables
+docker exec -it 7345bd0e9d35 env | grep GF_
+
+
+# Grafana Docker heavily uses env variables like:
+
+GF_LOG_LEVEL
+GF_PATHS_DATA
+GF_SECURITY_ADMIN_PASSWORD
+
+docker logs -f 7345bd0e9d35
+
+docker ps --format "table {{.Names}}\t{{.Ports}}"
+
+docker inspect prometheus | grep -A 5 Networks
+
+docker inspect react-dev-container | grep -A 5 Networks
+
+docker network create monitoring
+
+docker network connect monitoring prometheus
+docker network connect monitoring grafana
+docker network connect monitoring node-exporter
+docker network connect monitoring react-dev-container
+
+docker network inspect monitoring

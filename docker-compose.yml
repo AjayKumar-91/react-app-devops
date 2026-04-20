@@ -2,57 +2,38 @@ services:
   react-app:
     container_name: react-dev-container
     build:
-      context: . 
+      context: .
       dockerfile: Dockerfile
     image: ajaykumar91/react-app-dev
     ports:
       - "80:80"
     restart: always
     networks:
-      - react-app-nw
-    healthcheck: 
-      test: ["CMD", "curl", "-f", "http://localhost"]
+      - monitoring  
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
-    logging:                        
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
-  react-app-prod:
-    container_name: react-prod-container
-    build:
-      context: . 
-      dockerfile: Dockerfile
-    image: ajaykumar91/react-app-prod
-    ports:
-      - "80:80"
-    restart: unless-stopped 
-    healthcheck: 
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    logging:                        
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"  
-  
   grafana:
     image: grafana/grafana-enterprise
     container_name: grafana
     ports:
       - "3000:3000"
+    depends_on:
+      - prometheus
+      - loki  
     volumes:
       - grafana_data:/var/lib/grafana
       - ./data/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
       - ./data/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
     networks:
-      - react-app-nw
+      - monitoring
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin    
     restart: unless-stopped
+   
 
   prometheus:
     image: prom/prometheus:latest
@@ -61,10 +42,12 @@ services:
       - "9090:9090"
     volumes:
       - prometheus_data:/prometheus
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'  
     networks:
-      - react-app-nw
-    restart: unless-stopped 
+      - monitoring
+    restart: unless-stopped
 
   node-exporter:
     image: prom/node-exporter:latest
@@ -79,15 +62,61 @@ services:
       - '--path.rootfs=/rootfs'
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    expose:
-      - 9100
+    ports:
+      - "9100:9100"
     networks:
-      - react-app-nw    
+      - monitoring
+  
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - monitoring
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki
+    ports:
+    - "3100:3100"
+    volumes:
+    - ./loki-config.yaml:/etc/loki/local-config.yaml
+    command:
+    - -config.file=/etc/loki/local-config.yaml
+    networks:
+    - monitoring  
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: promtail
+    volumes:
+      - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./promtail.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - monitoring     
+
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    networks:
+      - monitoring      
 
 networks:
-  react-app-nw:
+  monitoring:
     driver: bridge
 
 volumes:
   prometheus_data: {}
-  grafana_data: {}            
+  grafana_data: {}
