@@ -1,4 +1,9 @@
 node_modules
+build
 .git
 .gitignore
 Dockerfile
+docker-compose.yml
+prometheus.yml
+loki-config.yaml
+promtail-config.yaml
