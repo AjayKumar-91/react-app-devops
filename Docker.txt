@@ -57,3 +57,43 @@ docker network connect monitoring node-exporter
 docker network connect monitoring react-dev-container
 
 docker network inspect monitoring
+
+
+sudo npm install -g pm2
+pm2 -v
+pm2 start deploy.sh --name react-app
+pm2 list
+pm2 monit
+
+# Install nvm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc
+
+# Install Node via nvm
+nvm install 18
+nvm use 18
+
+# Now install pm2 safely
+npm install -g pm2
+
+
+# 1. Build image
+docker build -t devops-build-dev .
+
+# 2. Verify image exists
+docker images
+
+# 3. Tag for Docker Hub
+docker tag devops-build-dev:latest ajaykumar91/devops-build-dev:latest
+
+# 4. Login
+docker login
+docker login -u ajaykumar91
+
+# 5. Push
+docker push ajaykumar91/devops-build-dev:latest
+
+docker build -t devops-build-prod .
+docker tag devops-build-prod ajaykumar91/devops-build-prod:latest
+docker login
+docker push ajaykumar91/devops-build-prod:latest
