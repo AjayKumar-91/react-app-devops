@@ -4,7 +4,6 @@ pipeline {
     environment {
         DEV_REPO  = "ajaykumar91/devops-build-dev"
         PROD_REPO = "ajaykumar91/devops-build-prod"
-        IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -15,27 +14,37 @@ pipeline {
             }
         }
 
-        stage('Detect Branch') {
+        stage('Set Variables') {
             steps {
                 script {
-                    echo "Building branch: ${env.BRANCH_NAME}"
+                    env.IMAGE_TAG = "${env.BUILD_NUMBER}"
+                    
+                    if (env.BRANCH_NAME == 'dev') {
+                        env.REPO = env.DEV_REPO
+                        env.CONTAINER_NAME = "dev-container"
+                        env.PORT = "3001"
+                    } else if (env.BRANCH_NAME == 'master') {
+                        env.REPO = env.PROD_REPO
+                        env.CONTAINER_NAME = "prod-container"
+                        env.PORT = "3000"
+                    } else {
+                        error "Unsupported branch: ${env.BRANCH_NAME}"
+                    }
+
+                    echo "Branch: ${env.BRANCH_NAME}"
+                    echo "Repo: ${env.REPO}"
+                    echo "Tag: ${env.IMAGE_TAG}"
                 }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    if (env.BRANCH_NAME == 'dev') {
-                        sh "docker build -t $DEV_REPO:$IMAGE_TAG ."
-                    } else if (env.BRANCH_NAME == 'master') {
-                        sh "docker build -t $PROD_REPO:$IMAGE_TAG ."
-                    }
-                }
+                sh "docker build -t ${env.REPO}:${env.IMAGE_TAG} ."
             }
         }
 
-        stage('Login to DockerHub') {
+        stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'DockerHub_Credentials',
@@ -47,38 +56,33 @@ pipeline {
             }
         }
 
-        stage('Push Image') {
+        stage('Push Docker Image') {
             steps {
-                script {
-                    if (env.BRANCH_NAME == 'dev') {
-                        sh "docker push $DEV_REPO:$IMAGE_TAG"
-                    } else if (env.BRANCH_NAME == 'master') {
-                        sh "docker push $PROD_REPO:$IMAGE_TAG"
-                    }
-                }
+                sh """
+                docker push ${env.REPO}:${env.IMAGE_TAG}
+                docker tag ${env.REPO}:${env.IMAGE_TAG} ${env.REPO}:latest
+                docker push ${env.REPO}:latest
+                """
             }
         }
 
         stage('Deploy Container') {
             steps {
-                script {
-                    if (env.BRANCH_NAME == 'dev') {
-                        sh """
-                        docker stop dev-container || true
-                        docker rm dev-container || true
-                        docker run -d -p 3001:80 --name dev-container $DEV_REPO:$IMAGE_TAG
-                        """
-                    }
-
-                    if (env.BRANCH_NAME == 'master') {
-                        sh """
-                        docker stop prod-container || true
-                        docker rm prod-container || true
-                        docker run -d -p 3000:80 --name prod-container $PROD_REPO:$IMAGE_TAG
-                        """
-                    }
-                }
+                sh """
+                docker stop ${env.CONTAINER_NAME} || true
+                docker rm ${env.CONTAINER_NAME} || true
+                docker run -d -p ${env.PORT}:80 --name ${env.CONTAINER_NAME} ${env.REPO}:${env.IMAGE_TAG}
+                """
             }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployment successful for ${env.BRANCH_NAME}"
+        }
+        failure {
+            echo "❌ Build failed"
         }
     }
 }
