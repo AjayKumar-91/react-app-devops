@@ -5,6 +5,16 @@ cd devops-build
 npm install -g serve
 serve -s . -l 80
 sudo serve -s . -l 80
+sudo serve -s build -l 80
+
+npm install -g serve
+serve -s . -l 80
+
+
+docker build -t react-app .
+docker build --no-cache -t react-app .
+docker run -d -p 80:80 react-devops-app
+
 
 # Run Application on Port 80
 docker build -t react-devops-app .

@@ -10,7 +10,7 @@ pipeline {
 
         stage('Clone') {
             steps {
-                git branch: 'dev', url: 'https://github.com/AjayKumar-91/devops-react-app.git'
+                git branch: 'dev', url: 'https://github.com/AjayKumar-91/react-app-devops.git'
             }
         }
 
@@ -31,7 +31,7 @@ pipeline {
 
         stage('Push to Prod Repo') {
             when {
-                branch 'master'
+                branch 'main'
             }
             steps {
                 sh 'docker tag $DEV_REPO $PROD_REPO'

@@ -3,6 +3,5 @@ node_modules
 .gitignore
 Dockerfile
 docker-compose.yml
-prometheus.yml
-loki-config.yaml
-promtail-config.yaml
+*.log
+*.md
