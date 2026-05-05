@@ -109,6 +109,8 @@ docker compose version
 <img width="1918" height="728" alt="image" src="https://github.com/user-attachments/assets/dc76e806-5805-414c-a7f4-31904703737e" />
 <img width="1918" height="962" alt="image" src="https://github.com/user-attachments/assets/77009f3b-4292-41c1-98fd-2602bf7ddb4e" />
 <img width="1918" height="968" alt="image" src="https://github.com/user-attachments/assets/4bc66ac5-4156-4113-b876-b66a34cc32b9" />
+<img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/498f448c-c589-4319-b0b9-63f06d750160" />
+
 <img width="1918" height="976" alt="image" src="https://github.com/user-attachments/assets/0dc4f693-6239-4744-bbf8-cbf62616f157" />
 <img width="1918" height="970" alt="image" src="https://github.com/user-attachments/assets/52dd8232-3fe9-4780-9ba1-06f820e3a1ac" />
 <img width="1918" height="977" alt="image" src="https://github.com/user-attachments/assets/0701f0aa-2fc6-4b7d-94cb-20d75c6c43ac" />
