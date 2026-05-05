@@ -18,7 +18,7 @@ pipeline {
         stage('Detect Branch') {
             steps {
                 script {
-                    echo "Branch: ${env.BRANCH_NAME}"
+                    echo "Building branch: ${env.BRANCH_NAME}"
                 }
             }
         }
@@ -26,68 +26,59 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh "docker build -t app:${IMAGE_TAG} ."
+                    if (env.BRANCH_NAME == 'dev') {
+                        sh "docker build -t $DEV_REPO:$IMAGE_TAG ."
+                    } else if (env.BRANCH_NAME == 'master') {
+                        sh "docker build -t $PROD_REPO:$IMAGE_TAG ."
+                    }
                 }
             }
         }
 
-        stage('Login to Docker Hub') {
+        stage('Login to DockerHub') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'DockerHub_Credentials',
+                    credentialsId: 'dockerhub-creds',
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
-                    )]) {
-                    sh '''
-                            set -e
-                            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                            docker push $DOCKER_IMAGE:$IMAGE_TAG
-                    '''
+                )]) {
+                    sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
                 }
             }
         }
 
-        stage('Push to Dev Repo') {
-            when {
-                branch 'dev'
-            }
+        stage('Push Image') {
             steps {
-                sh "docker tag app:${IMAGE_TAG} ${DEV_REPO}:${IMAGE_TAG}"
-                sh "docker tag app:${IMAGE_TAG} ${DEV_REPO}:latest"
-                sh "docker push ${DEV_REPO}:${IMAGE_TAG}"
-                sh "docker push ${DEV_REPO}:latest"
-            }
-        }
-
-        stage('Push to Prod Repo') {
-            when {
-                branch 'main'
-            }
-            steps {
-                sh "docker tag app:${IMAGE_TAG} ${PROD_REPO}:${IMAGE_TAG}"
-                sh "docker tag app:${IMAGE_TAG} ${PROD_REPO}:latest"
-                sh "docker push ${PROD_REPO}:${IMAGE_TAG}"
-                sh "docker push ${PROD_REPO}:latest"
-            }
-        }
-
-        stage('Deploy') {
-            when {
-                anyOf {
-                    branch 'dev'
-                    branch 'main'
+                script {
+                    if (env.BRANCH_NAME == 'dev') {
+                        sh "docker push $DEV_REPO:$IMAGE_TAG"
+                    } else if (env.BRANCH_NAME == 'master') {
+                        sh "docker push $PROD_REPO:$IMAGE_TAG"
+                    }
                 }
             }
-            steps {
-                sh "chmod +x deploy.sh"
-                sh "./deploy.sh"
-            }
         }
-    }
 
-    post {
-        always {
-            sh "docker system prune -f || true"
+        stage('Deploy Container') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'dev') {
+                        sh """
+                        docker stop dev-container || true
+                        docker rm dev-container || true
+                        docker run -d -p 3001:80 --name dev-container $DEV_REPO:$IMAGE_TAG
+                        """
+                    }
+
+                    if (env.BRANCH_NAME == 'master') {
+                        sh """
+                        docker stop prod-container || true
+                        docker rm prod-container || true
+                        docker run -d -p 3000:80 --name prod-container $PROD_REPO:$IMAGE_TAG
+                        """
+                    }
+                }
+            }
         }
     }
 }
