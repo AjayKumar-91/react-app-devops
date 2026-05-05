@@ -93,7 +93,25 @@ docker compose up -d
 ---
 <img width="1918" height="545" alt="image" src="https://github.com/user-attachments/assets/cfdc247b-2821-4005-8eed-b42f3bab26d5" />
 <img width="1918" height="728" alt="image" src="https://github.com/user-attachments/assets/dc76e806-5805-414c-a7f4-31904703737e" />
+<img width="1918" height="962" alt="image" src="https://github.com/user-attachments/assets/77009f3b-4292-41c1-98fd-2602bf7ddb4e" />
+<img width="1918" height="968" alt="image" src="https://github.com/user-attachments/assets/4bc66ac5-4156-4113-b876-b66a34cc32b9" />
+<img width="1918" height="976" alt="image" src="https://github.com/user-attachments/assets/0dc4f693-6239-4744-bbf8-cbf62616f157" />
+<img width="1918" height="970" alt="image" src="https://github.com/user-attachments/assets/52dd8232-3fe9-4780-9ba1-06f820e3a1ac" />
+<img width="1918" height="977" alt="image" src="https://github.com/user-attachments/assets/0701f0aa-2fc6-4b7d-94cb-20d75c6c43ac" />
+<img width="1918" height="962" alt="image" src="https://github.com/user-attachments/assets/5c580d37-185d-4864-bd5d-495cd730f819" />
+<img width="1918" height="863" alt="image" src="https://github.com/user-attachments/assets/495c904c-3402-42b7-aeda-052ae2ed60fa" />
+<img width="1918" height="973" alt="image" src="https://github.com/user-attachments/assets/fa02762c-d0c1-428c-be85-ffc30bb48da6" />
+<img width="1918" height="962" alt="image" src="https://github.com/user-attachments/assets/ef93808c-9edb-4f08-b9ff-463b48c8d0a6" />
+<img width="1915" height="965" alt="image" src="https://github.com/user-attachments/assets/0046f50f-5f87-4d51-9b9d-d2da17feec9a" />
+<img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/c5c70745-29a9-4125-aaed-381f8e8e9695" />
+<img width="1918" height="986" alt="image" src="https://github.com/user-attachments/assets/7334b7d1-21a5-4876-ae65-68d269edf444" />
+<img width="1918" height="960" alt="image" src="https://github.com/user-attachments/assets/cc08156e-bf1b-4ec2-bcdb-f76989d3adf5" />
 
+
+---
+# Clone my own repo in ec2
+
+<img width="1918" height="425" alt="image" src="https://github.com/user-attachments/assets/5de90c99-3ee8-4364-83d1-e236f18b845d" />
 
 ---
 
