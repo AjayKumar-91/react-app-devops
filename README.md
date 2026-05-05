@@ -66,8 +66,9 @@ npx serve -s build -l tcp://0.0.0.0:5000
 
 # Setup Jenlkins & Docker
 ```
-sudo apt update
-sudo apt install fontconfig openjdk-21-jre
+sudo apt update -y
+sudo apt upgrade -y
+sudo apt install fontconfig openjdk-21-jre -y
 java -version
 
 sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
@@ -75,20 +76,33 @@ sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
 echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc]" \
   https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
   /etc/apt/sources.list.d/jenkins.list > /dev/null
-sudo apt update
-sudo apt install jenkins
+sudo apt update -y
+sudo apt install jenkins -y
+
+sudo systemctl enable jenkins
+sudo systemctl start jenkins
 
 sudo apt update -y
 sudo apt install docker.io -y
 sudo systemctl start docker
 sudo systemctl enable docker
+sudo usermod -aG docker ubuntu
+sudo usermod -aG docker jenkins
+newgrp docker
+sudo systemctl restart jenkins
+
+
 docker --version
 sudo apt install docker-compose-v2 -y
 docker compose version
-docker-compose --version
 
 docker compose up
 docker compose up -d
+
+java -version
+jenkins --version
+docker --version
+docker compose version
 ```
 ---
 <img width="1918" height="545" alt="image" src="https://github.com/user-attachments/assets/cfdc247b-2821-4005-8eed-b42f3bab26d5" />
