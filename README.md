@@ -44,18 +44,14 @@ Docker Hub (dev / prod repos)
 ## 📄 Dockerfile
 
 ```dockerfile
-# Stage 1: Build React App
-FROM node:18 as build
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-
-# Stage 2: Serve with Nginx
 FROM nginx:alpine
-COPY --from=build /app/build /usr/share/nginx/html
+
+RUN rm -rf /usr/share/nginx/html/*
+
+COPY build/ /usr/share/nginx/html/
+
 EXPOSE 80
+
 CMD ["nginx", "-g", "daemon off;"]
 ```
 
@@ -64,14 +60,27 @@ CMD ["nginx", "-g", "daemon off;"]
 ## 📄 docker-compose.yml
 
 ```yaml
-version: '3.8'
 services:
-  app:
-    image: devops-build:latest
-    container_name: react-app
+  react-app:
+    container_name: react-dev-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ajaykumar91/react-app-dev
     ports:
       - "80:80"
     restart: always
+    networks:
+      - monitoring  
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  monitoring:
+    driver: bridge
 ```
 
 ---
@@ -83,13 +92,16 @@ services:
 ```bash
 #!/bin/bash
 
-IMAGE_NAME="devops-build"
-TAG="latest"
+IMAGE_NAME=react-devops-app
 
- echo "Building Docker Image..."
- docker build -t $IMAGE_NAME:$TAG .
+echo "Building Docker Image..."
+docker build -t $IMAGE_NAME .
 
- echo "Build Completed"
+echo "Tagging Image..."
+docker tag $IMAGE_NAME ajaykumar91/dev:$IMAGE_NAME
+
+echo "Pushing to DockerHub DEV..."
+docker push ajaykumar91/dev:$IMAGE_NAME
 ```
 
 ---
@@ -99,18 +111,19 @@ TAG="latest"
 ```bash
 #!/bin/bash
 
-IMAGE_NAME="devops-build"
-TAG="latest"
-CONTAINER_NAME="react-app"
+IMAGE_NAME=react-devops-app
 
- echo "Stopping existing container..."
- docker stop $CONTAINER_NAME || true
- docker rm $CONTAINER_NAME || true
+echo "Pulling latest image..."
+docker pull ajaykumar91/dev:$IMAGE_NAME
 
- echo "Running new container..."
- docker run -d -p 80:80 --name $CONTAINER_NAME $IMAGE_NAME:$TAG
+echo "Stopping old container..."
+docker stop react-container || true
+docker rm react-container || true
 
- echo "Deployment Successful"
+echo "Running new container..."
+docker run -d -p 80:80 --name react-container ajaykumar91/dev:$IMAGE_NAME
+
+echo "Deployment Done!"
 ```
 
 ---
@@ -140,18 +153,21 @@ git push origin dev
 
 ```
 node_modules/
-build/
 .env
+build/
+*.log
 ```
 
 * `.dockerignore`
 
 ```
 node_modules
-npm-debug.log
 .git
 .gitignore
-build
+Dockerfile
+docker-compose.yml
+*.log
+*.md
 ```
 
 ---
@@ -166,8 +182,8 @@ build
 ## Image Naming Convention
 
 ```
-username/devops-build-dev:latest
-username/devops-build-prod:latest
+ajaykumar91/devops-build-dev:latest
+ajaykumar91/devops-build-prod:latest
 ```
 
 ---
@@ -194,50 +210,52 @@ pipeline {
     agent any
 
     environment {
-        DEV_IMAGE = "username/devops-build-dev"
-        PROD_IMAGE = "username/devops-build-prod"
+        DEV_REPO = "ajaykumar91/devops-build-dev"
+        PROD_REPO = "ajaykumar91/devops-build-prod"
     }
 
     stages {
-        stage('Checkout') {
+
+        stage('Clone') {
             steps {
-                git branch: 'dev', url: 'https://github.com/sriram-R-krishnan/devops-build.git'
+                git branch: 'dev', url: 'https://github.com/AjayKumar-91/react-app-devops.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t devops-build .'
+                sh 'docker build -t $DEV_REPO .'
             }
         }
 
-        stage('Push to Dev') {
+        stage('Push to Dev Repo') {
             when {
                 branch 'dev'
             }
             steps {
-                sh 'docker tag devops-build $DEV_IMAGE:latest'
-                sh 'docker push $DEV_IMAGE:latest'
+                sh 'docker push $DEV_REPO'
             }
         }
 
-        stage('Push to Prod') {
+        stage('Push to Prod Repo') {
             when {
-                branch 'master'
+                branch 'main'
             }
             steps {
-                sh 'docker tag devops-build $PROD_IMAGE:latest'
-                sh 'docker push $PROD_IMAGE:latest'
+                sh 'docker tag $DEV_REPO $PROD_REPO'
+                sh 'docker push $PROD_REPO'
             }
         }
 
         stage('Deploy') {
             steps {
+                sh 'chmod +x deploy.sh'
                 sh './deploy.sh'
             }
         }
     }
 }
+
 ```
 
 ---
