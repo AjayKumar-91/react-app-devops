@@ -2,21 +2,43 @@ pipeline {
     agent any
 
     environment {
-        DEV_REPO = "ajaykumar91/devops-build-dev"
+        DEV_REPO  = "ajaykumar91/devops-build-dev"
         PROD_REPO = "ajaykumar91/devops-build-prod"
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
 
-        stage('Clone') {
+        stage('Checkout') {
             steps {
-                git branch: 'dev', url: 'https://github.com/AjayKumar-91/react-app-devops.git'
+                checkout scm
+            }
+        }
+
+        stage('Detect Branch') {
+            steps {
+                script {
+                    echo "Branch: ${env.BRANCH_NAME}"
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DEV_REPO .'
+                script {
+                    sh "docker build -t app:${IMAGE_TAG} ."
+                }
+            }
+        }
+
+        stage('Login to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS')]) {
+
+                    sh "echo $PASS | docker login -u $USER --password-stdin"
+                }
             }
         }
 
@@ -25,7 +47,10 @@ pipeline {
                 branch 'dev'
             }
             steps {
-                sh 'docker push $DEV_REPO'
+                sh "docker tag app:${IMAGE_TAG} ${DEV_REPO}:${IMAGE_TAG}"
+                sh "docker tag app:${IMAGE_TAG} ${DEV_REPO}:latest"
+                sh "docker push ${DEV_REPO}:${IMAGE_TAG}"
+                sh "docker push ${DEV_REPO}:latest"
             }
         }
 
@@ -34,16 +59,30 @@ pipeline {
                 branch 'main'
             }
             steps {
-                sh 'docker tag $DEV_REPO $PROD_REPO'
-                sh 'docker push $PROD_REPO'
+                sh "docker tag app:${IMAGE_TAG} ${PROD_REPO}:${IMAGE_TAG}"
+                sh "docker tag app:${IMAGE_TAG} ${PROD_REPO}:latest"
+                sh "docker push ${PROD_REPO}:${IMAGE_TAG}"
+                sh "docker push ${PROD_REPO}:latest"
             }
         }
 
         stage('Deploy') {
-            steps {
-                sh 'chmod +x deploy.sh'
-                sh './deploy.sh'
+            when {
+                anyOf {
+                    branch 'dev'
+                    branch 'main'
+                }
             }
+            steps {
+                sh "chmod +x deploy.sh"
+                sh "./deploy.sh"
+            }
+        }
+    }
+
+    post {
+        always {
+            sh "docker system prune -f || true"
         }
     }
 }
