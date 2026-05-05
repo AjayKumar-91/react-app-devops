@@ -90,6 +90,12 @@ docker-compose --version
 docker compose up
 docker compose up -d
 ```
+---
+<img width="1918" height="545" alt="image" src="https://github.com/user-attachments/assets/cfdc247b-2821-4005-8eed-b42f3bab26d5" />
+<img width="1918" height="728" alt="image" src="https://github.com/user-attachments/assets/dc76e806-5805-414c-a7f4-31904703737e" />
+
+
+---
 
 # 🐳 Docker Setup
 
