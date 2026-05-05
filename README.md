@@ -37,7 +37,59 @@ Docker Hub (dev / prod repos)
      Users Access App
 ```
 
+
+# local run application
+```bash
+npm install -g serve
+sudo npx serve -s build -l 80
+OR
+npx serve -s build -l tcp://0.0.0.0:5000
+```
+
+<img width="1918" height="1017" alt="image" src="https://github.com/user-attachments/assets/80236e91-fd22-431e-a081-8ab9de5d2fc0" />
+
 ---
+
+# Create EC2 instance and SSH access
+<img width="1918" height="1007" alt="image" src="https://github.com/user-attachments/assets/7a1e54d2-57bf-40e4-8090-54d056dcef1a" />
+<img width="1918" height="968" alt="image" src="https://github.com/user-attachments/assets/3351579f-779a-4130-af4d-884776300e93" />
+<img width="1918" height="976" alt="image" src="https://github.com/user-attachments/assets/4a4c03a8-62cc-4f24-a979-25a30f0b6382" />
+<img width="1918" height="972" alt="image" src="https://github.com/user-attachments/assets/d0e0193c-bb68-41a5-8d0a-8811cbd095dc" />
+<img width="1918" height="966" alt="image" src="https://github.com/user-attachments/assets/633995ce-4233-4151-bf25-89cdae8901df" />
+<img width="1918" height="977" alt="image" src="https://github.com/user-attachments/assets/965d12c5-e2d6-4f4d-85a9-ea73b645cf7a" />
+<img width="1907" height="965" alt="image" src="https://github.com/user-attachments/assets/c2bebbab-2c44-4a01-b7d3-7ce8031fca42" />
+<img width="1917" height="967" alt="image" src="https://github.com/user-attachments/assets/07e5ff0e-bbc8-419f-87ab-12b8dd69a6de" />
+<img width="1917" height="967" alt="image" src="https://github.com/user-attachments/assets/4725600f-f8bb-4516-8db3-53a1793f6fe5" />
+<img width="1918" height="1025" alt="image" src="https://github.com/user-attachments/assets/49ba0669-33fe-4cb7-8ac2-5c4df231f263" />
+
+---
+
+# Setup Jenlkins & Docker
+```
+sudo apt update
+sudo apt install fontconfig openjdk-21-jre
+java -version
+
+sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc]" \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt update
+sudo apt install jenkins
+
+sudo apt update -y
+sudo apt install docker.io -y
+sudo systemctl start docker
+sudo systemctl enable docker
+docker --version
+sudo apt install docker-compose-v2 -y
+docker compose version
+docker-compose --version
+
+docker compose up
+docker compose up -d
+```
 
 # 🐳 Docker Setup
 
@@ -53,6 +105,28 @@ COPY build/ /usr/share/nginx/html/
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
+```
+
+# Docker Setup Build Image
+```bash
+docker build -t react-devops-app .
+```
+# Rebuild clean
+```bash
+docker build --no-cache -t react-devops-app .
+```
+# Dockerfile run containers
+```bash
+docker run -d -p 80:80 react-devops-app
+docker run -d --name react-app-container -p 80:80 react-devops-app
+```
+
+# OR
+
+# Run Application on Port 80
+```bash
+docker build -t react-devops-app .
+docker run -d -p 80:80 --name react-app-container react-devops-app
 ```
 
 ---
