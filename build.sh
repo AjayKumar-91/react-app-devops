@@ -28,8 +28,6 @@ if [ "$BRANCH" == "dev" ]; then
     docker push $DEV_REPO:$BUILD_NUMBER
     docker push $DEV_REPO:latest
 
-fi
-
 # PROD BUILD
 elif [ "$BRANCH" == "master" ]; then
 

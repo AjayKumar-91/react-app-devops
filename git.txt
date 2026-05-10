@@ -52,3 +52,8 @@ run dev
 
 run master
 ./build.sh master 1
+
+
+chmod +x deploy.sh
+./deploy.sh dev 1
+./deploy.sh master 1
