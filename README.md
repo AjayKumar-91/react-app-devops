@@ -227,6 +227,9 @@ echo "Pushing image..."
 docker push $REPO:$BUILD_NUMBER
 echo "Build completed"
 ```
+<img width="1918" height="1008" alt="image" src="https://github.com/user-attachments/assets/aeb6d532-ad6f-43c9-88ac-bc128be802c6" />
+<img width="1918" height="476" alt="image" src="https://github.com/user-attachments/assets/4d1abc49-a043-44f3-b22e-34c6ce729181" />
+
 
 ---
 
@@ -267,6 +270,8 @@ docker rm $CONTAINER || true
 docker run -d --name $CONTAINER -p $PORT:80 $REPO:$BUILD_NUMBER
 echo "Deployment completed"
 ```
+<img width="1915" height="1022" alt="image" src="https://github.com/user-attachments/assets/0bb9d0e6-8068-4582-a6af-36ec285cfe8f" />
+<img width="1918" height="1012" alt="image" src="https://github.com/user-attachments/assets/718a889a-6565-44f7-8447-0194b776f8d0" />
 
 ---
 
