@@ -336,9 +336,19 @@ docker-compose.yml
 ## Image Naming Convention
 
 ```
+docker login
+docker build -t ajaykumar91/devops-build-dev:latest .
+docker push ajaykumar91/devops-build-dev:latest
+
+docker build -t ajaykumar91/devops-build-prod:latest .
+docker push ajaykumar91/devops-build-prod:latest
+
 ajaykumar91/devops-build-dev:latest
 ajaykumar91/devops-build-prod:latest
 ```
+<img width="1916" height="958" alt="image" src="https://github.com/user-attachments/assets/d2e718e1-818a-40df-aaa1-2a530fb48db4" />
+<img width="1918" height="971" alt="image" src="https://github.com/user-attachments/assets/5ec7db0d-28f3-41c4-90d8-a5e59aec6335" />
+<img width="1917" height="973" alt="image" src="https://github.com/user-attachments/assets/71abb5db-b087-415c-aef5-fa79d429920d" />
 
 ---
 
@@ -419,6 +429,8 @@ pipeline {
     }
 }
 ```
+<img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/3a1c124e-2347-40d3-804a-411108c21bc1" />
+<img width="1918" height="972" alt="image" src="https://github.com/user-attachments/assets/6e6dd499-67be-4b80-a3ae-8bc01392cc48" />
 
 ---
 
@@ -435,6 +447,12 @@ pipeline {
 | ---- | ---- | ---------- |
 | HTTP | 80   | 0.0.0.0/0  |
 | SSH  | 22   | My IP Only |
+
+
+<img width="1918" height="971" alt="image" src="https://github.com/user-attachments/assets/b0aa5ed1-dda4-4e17-a0f2-523f19628f40" />
+<img width="1918" height="977" alt="image" src="https://github.com/user-attachments/assets/1ef5cc3b-2a45-4780-b0df-96d7a4688050" />
+<img width="1906" height="633" alt="image" src="https://github.com/user-attachments/assets/571232e4-5996-4944-b1ec-c16918d0c2a4" />
+<img width="1918" height="972" alt="image" src="https://github.com/user-attachments/assets/27a4aacd-b123-4f8b-b6ed-d74f5847ab86" />
 
 ---
 
