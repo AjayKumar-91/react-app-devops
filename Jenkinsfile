@@ -1,12 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_DEV = "ajaykumar91/devops-build-dev"
-        DOCKER_PROD = "ajaykumar91/devops-build-prod"
-        IMAGE_TAG = "${env.BUILD_NUMBER}"
-    }
-
     stages {
 
         stage('Checkout') {
@@ -15,85 +9,50 @@ pipeline {
             }
         }
 
-        stage('Detect Branch') {
+        stage('Set Permissions') {
             steps {
-                script {
-                    echo "Branch: ${env.BRANCH_NAME ?: env.GIT_BRANCH}"
-                }
+                sh 'chmod +x build.sh'
+                sh 'chmod +x deploy.sh'
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    def branch = env.BRANCH_NAME ?: env.GIT_BRANCH
-
-                    if (branch.contains('dev')) {
-                        sh "docker build -t ${DOCKER_DEV}:${IMAGE_TAG} ."
-                    } else if (branch.contains('master')) {
-                        sh "docker build -t ${DOCKER_PROD}:${IMAGE_TAG} ."
-                    }
-                }
-            }
-        }
-
-        stage('Login to DockerHub') {
+        stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'DockerHub_Credentials',
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login \
+                    -u "$DOCKER_USER" --password-stdin
+                    '''
                 }
             }
         }
 
-        stage('Push Image') {
+        stage('Build Docker Image') {
             steps {
-                script {
-                    def branch = env.BRANCH_NAME ?: env.GIT_BRANCH
-
-                    if (branch.contains('dev')) {
-                        sh "docker push ${DOCKER_DEV}:${IMAGE_TAG}"
-                    } else if (branch.contains('master')) {
-                        sh "docker push ${DOCKER_PROD}:${IMAGE_TAG}"
-                    }
-                }
+                sh "./build.sh dev ${BUILD_NUMBER}"
             }
         }
 
-        stage('Deploy Container') {
+        stage('Deploy Application') {
             steps {
-                script {
-                    def branch = env.BRANCH_NAME ?: env.GIT_BRANCH
-
-                    if (branch.contains('dev')) {
-                        sh """
-                        docker stop dev-container || true
-                        docker rm dev-container || true
-                        docker run -d -p 3001:80 --name dev-container ${DOCKER_DEV}:${IMAGE_TAG}
-                        """
-                    }
-
-                    if (branch.contains('master')) {
-                        sh """
-                        docker stop prod-container || true
-                        docker rm prod-container || true
-                        docker run -d -p 3000:80 --name prod-container ${DOCKER_PROD}:${IMAGE_TAG}
-                        """
-                    }
-                }
+                sh "./deploy.sh dev ${BUILD_NUMBER}"
             }
         }
     }
+
     post {
+
         success {
-            echo "Deployment successful: ${IMAGE_TAG}"
+            echo 'Pipeline executed successfully!'
         }
+
         failure {
-            echo "Pipeline failed"
+            echo 'Pipeline failed!'
         }
     }
 }
-

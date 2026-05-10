@@ -1,0 +1,59 @@
+Initialize Git Repository
+git init
+
+Configure Git Username & Email
+git config --global user.name "AjayKumar-91"
+git config --global user.email "ajayvirendrasingh007@gmail.com"
+
+Create DEV Branch
+git checkout -b dev
+
+Add Files
+git add .
+
+Commit Code
+git commit -m "Initial DevOps project setup"
+
+Create GitHub Repository
+repo name: react-app-devops
+
+Add Remote Repository
+git remote add origin https://github.com/AjayKumar-91/react-app-devops.git
+
+
+Push Code To DEV Branch
+git push -u origin dev
+
+Verify Branch
+git branch
+
+Verify Remote URL
+git remote -v
+
+Future Workflow
+Push Changes To DEV
+git checkout dev
+
+git add .
+git commit -m "Updated application"
+git push origin dev
+
+Merge DEV → MASTER
+git checkout -b master
+git merge dev
+git push -u origin master
+
+
+Give Permission
+chmod +x build.sh
+
+run dev
+./build.sh dev 1
+
+run master
+./build.sh master 1
+
+
+chmod +x deploy.sh
+./deploy.sh dev 1
+./deploy.sh master 1

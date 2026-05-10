@@ -5,3 +5,8 @@ Dockerfile
 docker-compose.yml
 *.log
 *.md
+README.md
+*.tmp
+Dockerfile.old
+.vscode
+.idea

@@ -180,7 +180,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ajaykumar91/react-app-dev
+    image: ajaykumar91/react-app-dev:${BUILD_NUMBER}
     ports:
       - "80:80"
     restart: always
