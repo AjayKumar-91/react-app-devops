@@ -10,6 +10,12 @@ PROD_REPO="ajaykumar91/devops-build-prod"
 
 echo "Starting Docker Build..."
 
+if [ -z "$BRANCH" ] || [ -z "$BUILD_NUMBER" ]; then
+    echo "Usage: ./build.sh <branch> <build_number>"
+    exit 1
+fi
+
+# DEV BUILD
 if [ "$BRANCH" == "dev" ]; then
 
     echo "Building DEV image..."
@@ -24,7 +30,8 @@ if [ "$BRANCH" == "dev" ]; then
 
 fi
 
-if [ "$BRANCH" == "master" ]; then
+# PROD BUILD
+elif [ "$BRANCH" == "master" ]; then
 
     echo "Building PROD image..."
 
@@ -36,6 +43,10 @@ if [ "$BRANCH" == "master" ]; then
     docker push $PROD_REPO:$BUILD_NUMBER
     docker push $PROD_REPO:latest
 
+else
+    echo "Invalid branch name!"
+    echo "Use: dev or master"
+    exit 1
 fi
 
 echo "Docker Build Completed Successfully"
