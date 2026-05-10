@@ -168,6 +168,9 @@ docker run -d --name react-app-container -p 80:80 react-devops-app
 docker build -t react-devops-app .
 docker run -d -p 80:80 --name react-app-container react-devops-app
 ```
+<img width="1918" height="707" alt="image" src="https://github.com/user-attachments/assets/7c0ffda9-689a-48ea-9950-a7800996f4ce" />
+<img width="1917" height="1012" alt="image" src="https://github.com/user-attachments/assets/2bf40c74-9baa-4ded-b183-6eef91450137" />
+<img width="1918" height="1021" alt="image" src="https://github.com/user-attachments/assets/19979241-df7a-4024-970c-0d6ab03006b1" />
 
 ---
 
@@ -196,6 +199,9 @@ networks:
   monitoring:
     driver: bridge
 ```
+<img width="1918" height="676" alt="image" src="https://github.com/user-attachments/assets/619ae8bf-ad1a-4238-b26e-430c1706a9b3" />
+
+<img width="1918" height="973" alt="image" src="https://github.com/user-attachments/assets/d0db60a0-bfa8-4f2b-8e03-e18df249da87" />
 
 ---
 
@@ -205,18 +211,31 @@ networks:
 
 ```bash
 #!/bin/bash
+set -e
+BRANCH=$1
+BUILD_NUMBER=$2
 
-IMAGE_NAME=react-devops-app
+DEV_REPO="ajaykumar91/devops-build-dev"
+PROD_REPO="ajaykumar91/devops-build-prod"
+echo "Starting Build..."
 
-echo "Building Docker Image..."
-docker build -t $IMAGE_NAME .
+if [ "$BRANCH" == "dev" ]; then
+    REPO=$DEV_REPO
+elif [ "$BRANCH" == "master" ]; then
+    REPO=$PROD_REPO
+else
+    echo "Invalid branch"
+    exit 1
+fi
 
-echo "Tagging Image..."
-docker tag $IMAGE_NAME ajaykumar91/dev:$IMAGE_NAME
-
-echo "Pushing to DockerHub DEV..."
-docker push ajaykumar91/dev:$IMAGE_NAME
+docker build -t $REPO:$BUILD_NUMBER .
+echo "Pushing image..."
+docker push $REPO:$BUILD_NUMBER
+echo "Build completed"
 ```
+<img width="1918" height="1008" alt="image" src="https://github.com/user-attachments/assets/aeb6d532-ad6f-43c9-88ac-bc128be802c6" />
+<img width="1918" height="476" alt="image" src="https://github.com/user-attachments/assets/4d1abc49-a043-44f3-b22e-34c6ce729181" />
+
 
 ---
 
@@ -224,21 +243,41 @@ docker push ajaykumar91/dev:$IMAGE_NAME
 
 ```bash
 #!/bin/bash
+set -e
+BRANCH=$1
+BUILD_NUMBER=$2
 
-IMAGE_NAME=react-devops-app
+DEV_REPO="ajaykumar91/devops-build-dev"
+PROD_REPO="ajaykumar91/devops-build-prod"
 
-echo "Pulling latest image..."
-docker pull ajaykumar91/dev:$IMAGE_NAME
+echo "Starting Deployment..."
 
-echo "Stopping old container..."
-docker stop react-container || true
-docker rm react-container || true
+if [ "$BRANCH" == "dev" ]; then
 
-echo "Running new container..."
-docker run -d -p 80:80 --name react-container ajaykumar91/dev:$IMAGE_NAME
+    REPO=$DEV_REPO
+    CONTAINER="dev-container"
+    PORT=3001
 
-echo "Deployment Done!"
+elif [ "$BRANCH" == "master" ]; then
+
+    REPO=$PROD_REPO
+    CONTAINER="prod-container"
+    PORT=80
+
+else
+    echo "Invalid branch"
+    exit 1
+fi
+
+docker pull $REPO:$BUILD_NUMBER
+docker stop $CONTAINER || true
+docker rm $CONTAINER || true
+
+docker run -d --name $CONTAINER -p $PORT:80 $REPO:$BUILD_NUMBER
+echo "Deployment completed"
 ```
+<img width="1915" height="1022" alt="image" src="https://github.com/user-attachments/assets/0bb9d0e6-8068-4582-a6af-36ec285cfe8f" />
+<img width="1918" height="1012" alt="image" src="https://github.com/user-attachments/assets/718a889a-6565-44f7-8447-0194b776f8d0" />
 
 ---
 
@@ -258,6 +297,7 @@ git add .
 git commit -m "initial commit"
 git push origin dev
 ```
+<img width="1918" height="1026" alt="image" src="https://github.com/user-attachments/assets/cdd13816-2c8e-4188-9e9f-6525454c2ed5" />
 
 ---
 
@@ -296,9 +336,19 @@ docker-compose.yml
 ## Image Naming Convention
 
 ```
+docker login
+docker build -t ajaykumar91/devops-build-dev:latest .
+docker push ajaykumar91/devops-build-dev:latest
+
+docker build -t ajaykumar91/devops-build-prod:latest .
+docker push ajaykumar91/devops-build-prod:latest
+
 ajaykumar91/devops-build-dev:latest
 ajaykumar91/devops-build-prod:latest
 ```
+<img width="1916" height="958" alt="image" src="https://github.com/user-attachments/assets/d2e718e1-818a-40df-aaa1-2a530fb48db4" />
+<img width="1918" height="971" alt="image" src="https://github.com/user-attachments/assets/5ec7db0d-28f3-41c4-90d8-a5e59aec6335" />
+<img width="1917" height="973" alt="image" src="https://github.com/user-attachments/assets/71abb5db-b087-415c-aef5-fa79d429920d" />
 
 ---
 
@@ -323,54 +373,64 @@ ajaykumar91/devops-build-prod:latest
 pipeline {
     agent any
 
-    environment {
-        DEV_REPO = "ajaykumar91/devops-build-dev"
-        PROD_REPO = "ajaykumar91/devops-build-prod"
-    }
-
     stages {
 
-        stage('Clone') {
+        stage('Checkout') {
             steps {
-                git branch: 'dev', url: 'https://github.com/AjayKumar-91/react-app-devops.git'
+                checkout scm
+            }
+        }
+
+        stage('Set Permissions') {
+            steps {
+                sh 'chmod +x build.sh'
+                sh 'chmod +x deploy.sh'
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'DockerHub_Credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login \
+                    -u "$DOCKER_USER" --password-stdin
+                    '''
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DEV_REPO .'
+                sh "./build.sh dev ${BUILD_NUMBER}"
             }
         }
 
-        stage('Push to Dev Repo') {
-            when {
-                branch 'dev'
-            }
+        stage('Deploy Application') {
             steps {
-                sh 'docker push $DEV_REPO'
-            }
-        }
-
-        stage('Push to Prod Repo') {
-            when {
-                branch 'main'
-            }
-            steps {
-                sh 'docker tag $DEV_REPO $PROD_REPO'
-                sh 'docker push $PROD_REPO'
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                sh 'chmod +x deploy.sh'
-                sh './deploy.sh'
+                sh "./deploy.sh dev ${BUILD_NUMBER}"
             }
         }
     }
-}
 
+    post {
+
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
 ```
+<img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/3a1c124e-2347-40d3-804a-411108c21bc1" />
+<img width="1918" height="972" alt="image" src="https://github.com/user-attachments/assets/6e6dd499-67be-4b80-a3ae-8bc01392cc48" />
 
 ---
 
@@ -378,8 +438,8 @@ pipeline {
 
 ## EC2 Setup
 
-* Instance Type: `t2.micro`
-* OS: Ubuntu 20.04
+* Instance Type: `t3.micro`
+* OS: Ubuntu 24.04
 
 ## Security Group Rules
 
@@ -387,6 +447,12 @@ pipeline {
 | ---- | ---- | ---------- |
 | HTTP | 80   | 0.0.0.0/0  |
 | SSH  | 22   | My IP Only |
+
+
+<img width="1918" height="971" alt="image" src="https://github.com/user-attachments/assets/b0aa5ed1-dda4-4e17-a0f2-523f19628f40" />
+<img width="1918" height="977" alt="image" src="https://github.com/user-attachments/assets/1ef5cc3b-2a45-4780-b0df-96d7a4688050" />
+<img width="1906" height="633" alt="image" src="https://github.com/user-attachments/assets/571232e4-5996-4944-b1ec-c16918d0c2a4" />
+<img width="1918" height="972" alt="image" src="https://github.com/user-attachments/assets/27a4aacd-b123-4f8b-b6ed-d74f5847ab86" />
 
 ---
 
