@@ -168,6 +168,9 @@ docker run -d --name react-app-container -p 80:80 react-devops-app
 docker build -t react-devops-app .
 docker run -d -p 80:80 --name react-app-container react-devops-app
 ```
+<img width="1918" height="707" alt="image" src="https://github.com/user-attachments/assets/7c0ffda9-689a-48ea-9950-a7800996f4ce" />
+<img width="1917" height="1012" alt="image" src="https://github.com/user-attachments/assets/2bf40c74-9baa-4ded-b183-6eef91450137" />
+<img width="1918" height="1021" alt="image" src="https://github.com/user-attachments/assets/19979241-df7a-4024-970c-0d6ab03006b1" />
 
 ---
 
