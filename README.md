@@ -205,17 +205,27 @@ networks:
 
 ```bash
 #!/bin/bash
+set -e
+BRANCH=$1
+BUILD_NUMBER=$2
 
-IMAGE_NAME=react-devops-app
+DEV_REPO="ajaykumar91/devops-build-dev"
+PROD_REPO="ajaykumar91/devops-build-prod"
+echo "Starting Build..."
 
-echo "Building Docker Image..."
-docker build -t $IMAGE_NAME .
+if [ "$BRANCH" == "dev" ]; then
+    REPO=$DEV_REPO
+elif [ "$BRANCH" == "master" ]; then
+    REPO=$PROD_REPO
+else
+    echo "Invalid branch"
+    exit 1
+fi
 
-echo "Tagging Image..."
-docker tag $IMAGE_NAME ajaykumar91/dev:$IMAGE_NAME
-
-echo "Pushing to DockerHub DEV..."
-docker push ajaykumar91/dev:$IMAGE_NAME
+docker build -t $REPO:$BUILD_NUMBER .
+echo "Pushing image..."
+docker push $REPO:$BUILD_NUMBER
+echo "Build completed"
 ```
 
 ---
@@ -224,20 +234,38 @@ docker push ajaykumar91/dev:$IMAGE_NAME
 
 ```bash
 #!/bin/bash
+set -e
+BRANCH=$1
+BUILD_NUMBER=$2
 
-IMAGE_NAME=react-devops-app
+DEV_REPO="ajaykumar91/devops-build-dev"
+PROD_REPO="ajaykumar91/devops-build-prod"
 
-echo "Pulling latest image..."
-docker pull ajaykumar91/dev:$IMAGE_NAME
+echo "Starting Deployment..."
 
-echo "Stopping old container..."
-docker stop react-container || true
-docker rm react-container || true
+if [ "$BRANCH" == "dev" ]; then
 
-echo "Running new container..."
-docker run -d -p 80:80 --name react-container ajaykumar91/dev:$IMAGE_NAME
+    REPO=$DEV_REPO
+    CONTAINER="dev-container"
+    PORT=3001
 
-echo "Deployment Done!"
+elif [ "$BRANCH" == "master" ]; then
+
+    REPO=$PROD_REPO
+    CONTAINER="prod-container"
+    PORT=80
+
+else
+    echo "Invalid branch"
+    exit 1
+fi
+
+docker pull $REPO:$BUILD_NUMBER
+docker stop $CONTAINER || true
+docker rm $CONTAINER || true
+
+docker run -d --name $CONTAINER -p $PORT:80 $REPO:$BUILD_NUMBER
+echo "Deployment completed"
 ```
 
 ---
@@ -323,53 +351,61 @@ ajaykumar91/devops-build-prod:latest
 pipeline {
     agent any
 
-    environment {
-        DEV_REPO = "ajaykumar91/devops-build-dev"
-        PROD_REPO = "ajaykumar91/devops-build-prod"
-    }
-
     stages {
 
-        stage('Clone') {
+        stage('Checkout') {
             steps {
-                git branch: 'dev', url: 'https://github.com/AjayKumar-91/react-app-devops.git'
+                checkout scm
+            }
+        }
+
+        stage('Set Permissions') {
+            steps {
+                sh 'chmod +x build.sh'
+                sh 'chmod +x deploy.sh'
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'DockerHub_Credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login \
+                    -u "$DOCKER_USER" --password-stdin
+                    '''
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DEV_REPO .'
+                sh "./build.sh dev ${BUILD_NUMBER}"
             }
         }
 
-        stage('Push to Dev Repo') {
-            when {
-                branch 'dev'
-            }
+        stage('Deploy Application') {
             steps {
-                sh 'docker push $DEV_REPO'
-            }
-        }
-
-        stage('Push to Prod Repo') {
-            when {
-                branch 'main'
-            }
-            steps {
-                sh 'docker tag $DEV_REPO $PROD_REPO'
-                sh 'docker push $PROD_REPO'
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                sh 'chmod +x deploy.sh'
-                sh './deploy.sh'
+                sh "./deploy.sh dev ${BUILD_NUMBER}"
             }
         }
     }
-}
 
+    post {
+
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
 ```
 
 ---
@@ -378,8 +414,8 @@ pipeline {
 
 ## EC2 Setup
 
-* Instance Type: `t2.micro`
-* OS: Ubuntu 20.04
+* Instance Type: `t3.micro`
+* OS: Ubuntu 24.04
 
 ## Security Group Rules
 
