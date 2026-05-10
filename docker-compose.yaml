@@ -1,17 +1,19 @@
+version: "3.8"
+
 services:
   react-app:
     container_name: react-dev-container
     build:
       context: .
       dockerfile: Dockerfile
-    image: ajaykumar91/react-app-dev:${BUILD_NUMBER}
+    image: ajaykumar91/react-app-dev:${BUILD_NUMBER:-latest}
     ports:
       - "80:80"
     restart: always
     networks:
       - monitoring
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
+      test: ["CMD", "wget", "-qO-", "http://localhost"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -22,18 +24,15 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - prometheus
-      - loki  
+      prometheus:
+        condition: service_started
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./data/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-      - ./data/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
     networks:
       - monitoring
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin    
+      - GF_SECURITY_ADMIN_PASSWORD=admin
     restart: unless-stopped
-   
 
   prometheus:
     image: prom/prometheus:latest
@@ -42,9 +41,12 @@ services:
       - "9090:9090"
     volumes:
       - prometheus_data:/prometheus
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/alert.rules.yml:/etc/prometheus/alert.rules.yml
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'  
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--rule.file=/etc/prometheus/alert.rules.yml"
+      - "--storage.tsdb.path=/prometheus"
     networks:
       - monitoring
     restart: unless-stopped
@@ -58,17 +60,15 @@ services:
       - /sys:/host/sys:ro
       - /:/rootfs:ro
     command:
-      - '--path.procfs=/host/proc'
-      - '--path.rootfs=/rootfs'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    ports:
-      - "9100:9100"
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
     networks:
       - monitoring
-  
+
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor
+    image: gcr.io/google-containers/cadvisor:latest
     container_name: cadvisor
     ports:
       - "8080:8080"
@@ -80,38 +80,16 @@ services:
     networks:
       - monitoring
 
-  loki:
-    image: grafana/loki:2.9.0
-    container_name: loki
-    ports:
-    - "3100:3100"
-    volumes:
-    - ./loki-config.yaml:/etc/loki/local-config.yaml
-    command:
-    - -config.file=/etc/loki/local-config.yaml
-    networks:
-    - monitoring  
-
-  promtail:
-    image: grafana/promtail:2.9.0
-    container_name: promtail
-    volumes:
-      - /var/log:/var/log
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - ./promtail.yml:/etc/promtail/config.yml
-    command: -config.file=/etc/promtail/config.yml
-    depends_on:
-      - loki
-    networks:
-      - monitoring     
-
   alertmanager:
     image: prom/alertmanager
     container_name: alertmanager
     ports:
       - "9093:9093"
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml
     networks:
-      - monitoring      
+      - monitoring
+    restart: unless-stopped
 
 networks:
   monitoring:
