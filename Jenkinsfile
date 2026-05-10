@@ -4,7 +4,6 @@ pipeline {
     environment {
         DEV_REPO  = "ajaykumar91/devops-build-dev"
         PROD_REPO = "ajaykumar91/devops-build-prod"
-        IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -38,6 +37,7 @@ pipeline {
 
         stage('Docker Login') {
             steps {
+
                 withCredentials([usernamePassword(
                     credentialsId: 'DockerHub_Credentials',
                     usernameVariable: 'DOCKER_USER',
@@ -53,28 +53,12 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-
-            when {
-                expression {
-                    env.GIT_BRANCH_NAME == 'dev' ||
-                    env.GIT_BRANCH_NAME == 'master'
-                }
-            }
-
             steps {
                 sh "./build.sh ${env.GIT_BRANCH_NAME} ${BUILD_NUMBER}"
             }
         }
 
         stage('Deploy Application') {
-
-            when {
-                expression {
-                    env.GIT_BRANCH_NAME == 'dev' ||
-                    env.GIT_BRANCH_NAME == 'master'
-                }
-            }
-
             steps {
                 sh "./deploy.sh ${env.GIT_BRANCH_NAME} ${BUILD_NUMBER}"
             }
