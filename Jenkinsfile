@@ -15,16 +15,24 @@ pipeline {
             }
         }
 
+        stage('Detect Branch') {
+            steps {
+                script {
+
+                    env.GIT_BRANCH_NAME = sh(
+                        script: "git rev-parse --abbrev-ref HEAD",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Detected Branch: ${env.GIT_BRANCH_NAME}"
+                }
+            }
+        }
+
         stage('Set Permissions') {
             steps {
                 sh 'chmod +x build.sh'
                 sh 'chmod +x deploy.sh'
-            }
-        }
-
-        stage('Show Branch') {
-            steps {
-                echo "Current Branch: ${env.BRANCH_NAME}"
             }
         }
 
@@ -48,13 +56,13 @@ pipeline {
 
             when {
                 expression {
-                    env.BRANCH_NAME == 'dev' ||
-                    env.BRANCH_NAME == 'master'
+                    env.GIT_BRANCH_NAME == 'dev' ||
+                    env.GIT_BRANCH_NAME == 'master'
                 }
             }
 
             steps {
-                sh "./build.sh ${env.BRANCH_NAME} ${BUILD_NUMBER}"
+                sh "./build.sh ${env.GIT_BRANCH_NAME} ${BUILD_NUMBER}"
             }
         }
 
@@ -62,13 +70,13 @@ pipeline {
 
             when {
                 expression {
-                    env.BRANCH_NAME == 'dev' ||
-                    env.BRANCH_NAME == 'master'
+                    env.GIT_BRANCH_NAME == 'dev' ||
+                    env.GIT_BRANCH_NAME == 'master'
                 }
             }
 
             steps {
-                sh "./deploy.sh ${env.BRANCH_NAME} ${BUILD_NUMBER}"
+                sh "./deploy.sh ${env.GIT_BRANCH_NAME} ${BUILD_NUMBER}"
             }
         }
     }
