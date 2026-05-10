@@ -199,6 +199,9 @@ networks:
   monitoring:
     driver: bridge
 ```
+<img width="1918" height="676" alt="image" src="https://github.com/user-attachments/assets/619ae8bf-ad1a-4238-b26e-430c1706a9b3" />
+
+<img width="1918" height="973" alt="image" src="https://github.com/user-attachments/assets/d0db60a0-bfa8-4f2b-8e03-e18df249da87" />
 
 ---
 
@@ -294,6 +297,7 @@ git add .
 git commit -m "initial commit"
 git push origin dev
 ```
+<img width="1918" height="1026" alt="image" src="https://github.com/user-attachments/assets/cdd13816-2c8e-4188-9e9f-6525454c2ed5" />
 
 ---
 
