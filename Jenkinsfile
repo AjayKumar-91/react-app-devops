@@ -45,10 +45,11 @@ pipeline {
         }
 
         stage('Build Docker Image') {
+
             when {
-                anyOf {
-                    branch 'dev'
-                    branch 'master'
+                expression {
+                    env.BRANCH_NAME == 'dev' ||
+                    env.BRANCH_NAME == 'master'
                 }
             }
 
@@ -58,10 +59,11 @@ pipeline {
         }
 
         stage('Deploy Application') {
+
             when {
-                anyOf {
-                    branch 'dev'
-                    branch 'master'
+                expression {
+                    env.BRANCH_NAME == 'dev' ||
+                    env.BRANCH_NAME == 'master'
                 }
             }
 
