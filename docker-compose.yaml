@@ -66,7 +66,7 @@ services:
       - monitoring
 
   cadvisor:
-    image: gcr.io/google-containers/cadvisor:latest
+    image: gcr.io/google-containers/cadvisor:v0.47.0
     container_name: cadvisor
     ports:
       - "8081:8080"
@@ -75,6 +75,9 @@ services:
       - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    restart: unless-stopped
+    privileged: true  
     networks:
       - monitoring
 
