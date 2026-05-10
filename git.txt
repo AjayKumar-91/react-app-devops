@@ -36,6 +36,8 @@ git checkout dev
 
 # DEV WORK
 git pull origin dev --rebase
+git push origin dev
+
 git checkout dev
 git add .
 git commit -m "message"
