@@ -10,45 +10,28 @@ PROD_REPO="ajaykumar91/devops-build-prod"
 
 echo "Starting Deployment..."
 
-if [ -z "$BRANCH" ] || [ -z "$BUILD_NUMBER" ]; then
-    echo "Usage: ./deploy.sh <branch> <build_number>"
-    exit 1
-fi
-
-# DEV DEPLOY
 if [ "$BRANCH" == "dev" ]; then
 
-    echo "Deploying DEV application..."
+    REPO=$DEV_REPO
+    CONTAINER="dev-container"
+    PORT=3001
 
-    docker pull $DEV_REPO:$BUILD_NUMBER
-
-    docker stop dev-container 2>/dev/null || true
-    docker rm dev-container 2>/dev/null || true
-
-    docker run -d \
-        --name dev-container \
-        -p 3001:80 \
-        $DEV_REPO:$BUILD_NUMBER
-
-# PROD DEPLOY
 elif [ "$BRANCH" == "master" ]; then
 
-    echo "Deploying PROD application..."
-
-    docker pull $PROD_REPO:$BUILD_NUMBER
-
-    docker stop prod-container 2>/dev/null || true
-    docker rm prod-container 2>/dev/null || true
-
-    docker run -d \
-        --name prod-container \
-        -p 80:80 \
-        $PROD_REPO:$BUILD_NUMBER
+    REPO=$PROD_REPO
+    CONTAINER="prod-container"
+    PORT=80
 
 else
-    echo "Invalid branch name!"
-    echo "Use: dev or master"
+    echo "Invalid branch"
     exit 1
 fi
 
-echo "Deployment Completed Successfully"
+docker pull $REPO:$BUILD_NUMBER
+
+docker stop $CONTAINER || true
+docker rm $CONTAINER || true
+
+docker run -d --name $CONTAINER -p $PORT:80 $REPO:$BUILD_NUMBER
+
+echo "Deployment completed"

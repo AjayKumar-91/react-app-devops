@@ -34,18 +34,21 @@ Future Workflow
 Push Changes To DEV
 git checkout dev
 
+# DEV WORK
+git checkout dev
 git add .
-git commit -m "Updated application"
+git commit -m "message"
 git push origin dev
 
-Merge DEV → MASTER
-git checkout -b master
+# MERGE TO MASTER
+git checkout master
+git pull origin master
 git merge dev
-git push -u origin master
-
+git push origin master
 
 Give Permission
 chmod +x build.sh
+chmod +x deploy.sh
 
 run dev
 ./build.sh dev 1
