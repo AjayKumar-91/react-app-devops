@@ -1,15 +1,45 @@
 #!/bin/bash
 
-IMAGE_NAME=react-devops-app
+set -e
 
-echo "Pulling latest image..."
-docker pull ajaykumar91/dev:$IMAGE_NAME
+BRANCH=$1
+BUILD_NUMBER=$2
 
-echo "Stopping old container..."
-docker stop react-container || true
-docker rm react-container || true
+DEV_REPO="ajaykumar91/devops-build-dev"
+PROD_REPO="ajaykumar91/devops-build-prod"
 
-echo "Running new container..."
-docker run -d -p 80:80 --name react-container ajaykumar91/dev:$IMAGE_NAME
+echo "Starting Deployment..."
 
-echo "Deployment Done!"
+if [ "$BRANCH" == "dev" ]; then
+
+    echo "Deploying DEV application..."
+
+    docker pull $DEV_REPO:$BUILD_NUMBER
+
+    docker stop dev-container || true
+    docker rm dev-container || true
+
+    docker run -d \
+    --name dev-container \
+    -p 80:80 \
+    $DEV_REPO:$BUILD_NUMBER
+
+fi
+
+if [ "$BRANCH" == "master" ]; then
+
+    echo "Deploying PROD application..."
+
+    docker pull $PROD_REPO:$BUILD_NUMBER
+
+    docker stop prod-container || true
+    docker rm prod-container || true
+
+    docker run -d \
+    --name prod-container \
+    -p 80:80 \
+    $PROD_REPO:$BUILD_NUMBER
+
+fi
+
+echo "Deployment Completed Successfully"
