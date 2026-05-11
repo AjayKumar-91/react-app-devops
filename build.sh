@@ -25,7 +25,10 @@ fi
 
 docker build -t $REPO:$BUILD_NUMBER .
 
-echo "Pushing image..."
 docker push $REPO:$BUILD_NUMBER
+
+docker tag $REPO:$BUILD_NUMBER $REPO:latest
+
+docker push $REPO:latest
 
 echo "Build completed"

@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        BRANCH = "${env.BRANCH_NAME}"
+    }
+
     stages {
 
         stage('Checkout') {
@@ -34,13 +38,13 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "./build.sh dev ${BUILD_NUMBER}"
+                sh "./build.sh ${BRANCH} ${BUILD_NUMBER}"
             }
         }
 
         stage('Deploy Application') {
             steps {
-                sh "./deploy.sh dev ${BUILD_NUMBER}"
+                sh "./deploy.sh ${BRANCH} ${BUILD_NUMBER}"
             }
         }
     }
@@ -53,6 +57,10 @@ pipeline {
 
         failure {
             echo 'Pipeline failed!'
+        }
+
+        always {
+            sh 'docker image prune -f'
         }
     }
 }
