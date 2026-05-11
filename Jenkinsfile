@@ -1,20 +1,22 @@
 pipeline {
     agent any
 
+    environment {
+        BRANCH = "${env.BRANCH_NAME}"
+    }
+
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
+                deleteDir()
                 checkout scm
             }
         }
 
-        stage('Get Branch Name') {
+        stage('Show Branch') {
             steps {
-                script {
-                    env.BRANCH = env.BRANCH_NAME
-                    echo "Current Branch: ${env.BRANCH}"
-                }
+                echo "Current Branch: ${BRANCH}"
             }
         }
 
@@ -43,13 +45,13 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "./build.sh ${env.BRANCH} ${BUILD_NUMBER}"
+                sh "./build.sh ${BRANCH} ${BUILD_NUMBER}"
             }
         }
 
         stage('Deploy Application') {
             steps {
-                sh "./deploy.sh ${env.BRANCH} ${BUILD_NUMBER}"
+                sh "./deploy.sh ${BRANCH} ${BUILD_NUMBER}"
             }
         }
     }
