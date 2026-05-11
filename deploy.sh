@@ -32,6 +32,17 @@ docker pull $REPO:$BUILD_NUMBER
 docker stop $CONTAINER || true
 docker rm $CONTAINER || true
 
-docker run -d --restart always --name $CONTAINER -p $PORT:80 $REPO:$BUILD_NUMBER
+OLD_CONTAINER=$(docker ps -q --filter publish=$PORT)
+
+if [ -n "$OLD_CONTAINER" ]; then
+    docker stop $OLD_CONTAINER
+    docker rm $OLD_CONTAINER
+fi
+
+docker run -d \
+--restart always \
+--name $CONTAINER \
+-p $PORT:80 \
+$REPO:$BUILD_NUMBER
 
 echo "Deployment completed"
