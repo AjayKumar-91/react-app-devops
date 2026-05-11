@@ -12,11 +12,7 @@ pipeline {
         stage('Get Branch Name') {
             steps {
                 script {
-                    env.BRANCH = sh(
-                        script: "git rev-parse --abbrev-ref HEAD",
-                        returnStdout: true
-                    ).trim()
-
+                    env.BRANCH = env.BRANCH_NAME
                     echo "Current Branch: ${env.BRANCH}"
                 }
             }
