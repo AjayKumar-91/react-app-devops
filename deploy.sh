@@ -20,7 +20,7 @@ elif [ "$BRANCH" == "master" ]; then
 
     REPO=$PROD_REPO
     CONTAINER="prod-container"
-    PORT=3000
+    PORT=80
 
 else
     echo "Invalid branch"
