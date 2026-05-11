@@ -32,6 +32,6 @@ docker pull $REPO:$BUILD_NUMBER
 docker stop $CONTAINER || true
 docker rm $CONTAINER || true
 
-docker run -d --name $CONTAINER -p $PORT:80 $REPO:$BUILD_NUMBER
+docker run -d --restart always --name $CONTAINER -p $PORT:80 $REPO:$BUILD_NUMBER
 
 echo "Deployment completed"
