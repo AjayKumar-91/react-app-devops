@@ -20,7 +20,7 @@ elif [ "$BRANCH" == "master" ]; then
 
     REPO=$PROD_REPO
     CONTAINER="prod-container"
-    PORT=80
+    PORT=3000
 
 else
     echo "Invalid branch"
@@ -32,7 +32,6 @@ docker pull $REPO:$BUILD_NUMBER
 docker stop $CONTAINER || true
 docker rm $CONTAINER || true
 
-# Remove any container using same port
 OLD_CONTAINER=$(docker ps -q --filter publish=$PORT)
 
 if [ -n "$OLD_CONTAINER" ]; then
@@ -40,6 +39,10 @@ if [ -n "$OLD_CONTAINER" ]; then
     docker rm $OLD_CONTAINER
 fi
 
-docker run -d --restart always --name $CONTAINER -p $PORT:80 $REPO:$BUILD_NUMBER
+docker run -d \
+--restart always \
+--name $CONTAINER \
+-p $PORT:80 \
+$REPO:$BUILD_NUMBER
 
 echo "Deployment completed"
