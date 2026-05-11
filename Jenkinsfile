@@ -14,10 +14,7 @@ pipeline {
             steps {
                 script {
 
-                    env.BRANCH = sh(
-                        script: "git rev-parse --abbrev-ref HEAD",
-                        returnStdout: true
-                    ).trim()
+                    env.BRANCH = env.GIT_BRANCH.tokenize('/').last()
 
                     echo "Current Branch: ${env.BRANCH}"
                 }
