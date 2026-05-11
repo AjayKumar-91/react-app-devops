@@ -375,9 +375,21 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
+                deleteDir()
                 checkout scm
+            }
+        }
+
+        stage('Get Branch Name') {
+            steps {
+                script {
+
+                    env.BRANCH = env.GIT_BRANCH.tokenize('/').last()
+
+                    echo "Current Branch: ${env.BRANCH}"
+                }
             }
         }
 
@@ -406,13 +418,13 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "./build.sh dev ${BUILD_NUMBER}"
+                sh "./build.sh ${env.BRANCH} ${BUILD_NUMBER}"
             }
         }
 
         stage('Deploy Application') {
             steps {
-                sh "./deploy.sh dev ${BUILD_NUMBER}"
+                sh "./deploy.sh ${env.BRANCH} ${BUILD_NUMBER}"
             }
         }
     }
@@ -426,11 +438,19 @@ pipeline {
         failure {
             echo 'Pipeline failed!'
         }
+
+        always {
+            sh 'docker image prune -f'
+        }
     }
 }
+
 ```
 <img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/3a1c124e-2347-40d3-804a-411108c21bc1" />
 <img width="1918" height="972" alt="image" src="https://github.com/user-attachments/assets/6e6dd499-67be-4b80-a3ae-8bc01392cc48" />
+<img width="1918" height="970" alt="image" src="https://github.com/user-attachments/assets/1e26d441-78fc-4ea3-881b-9a1b0265b437" />
+<img width="1918" height="1023" alt="image" src="https://github.com/user-attachments/assets/b8da3c43-885b-45a8-b9fa-cef7e14033f7" />
+<img width="1918" height="963" alt="image" src="https://github.com/user-attachments/assets/dbbb0930-3c92-4ce4-9b5e-5c0e01692b2a" />
 
 ---
 
