@@ -482,18 +482,59 @@ pipeline {
 
 * Prometheus
 * Grafana
-* Uptime Kuma (simple alternative)
+* cAdvisor
+* Node Exporter
+* Alertmanager
 
 ## Health Check Endpoint
 
 ```
-http://<ec2-public-ip>/
+http://52.23.221.54:9090/targets
 ```
 
 ## Alerting
 
 * Email notifications on downtime
 * Slack integration (optional)
+
+# Prometheus
+<img width="1917" height="966" alt="image" src="https://github.com/user-attachments/assets/a90c7b57-c230-4700-8871-85fd94647c77" />
+<img width="1918" height="983" alt="image" src="https://github.com/user-attachments/assets/943e7ef8-d06a-4206-8bea-97899a08f6f8" />
+<img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/74032f23-5506-4b1e-a222-1d9e9cc44f31" />
+<img width="1918" height="976" alt="image" src="https://github.com/user-attachments/assets/9360a777-06e2-47bf-a05b-b19288424b28" />
+<img width="1918" height="661" alt="image" src="https://github.com/user-attachments/assets/65c5025c-a748-4269-9c8a-74d8234d9a03" />
+<img width="1917" height="965" alt="image" src="https://github.com/user-attachments/assets/1c19c737-43f9-4cad-8c1f-e8bc636b8f46" />
+<img width="1918" height="971" alt="image" src="https://github.com/user-attachments/assets/cd30f68a-7884-4758-b5ac-5dc3996c06ba" />
+<img width="1918" height="972" alt="image" src="https://github.com/user-attachments/assets/09613316-cb1a-4a5b-bc34-7ace3a7d0b8a" />
+<img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/a6a355df-978c-4c9b-b2c8-980af0f7b7a5" />
+<img width="1918" height="981" alt="image" src="https://github.com/user-attachments/assets/94ac7e28-6946-4b56-93f1-fddc15ae740c" />
+<img width="1918" height="978" alt="image" src="https://github.com/user-attachments/assets/3858db60-e99d-4f99-896d-dbb5eaf03ff7" />
+<img width="1918" height="977" alt="image" src="https://github.com/user-attachments/assets/4179146e-974e-4de2-aec5-80fadfa0827f" />
+
+# cAdvisor
+<img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/28f772ac-3ea6-4b18-8604-88b2d357de59" />
+<img width="1918" height="976" alt="image" src="https://github.com/user-attachments/assets/543d4c27-305d-4def-889b-e32364f5856a" />
+<img width="361" height="853" alt="image" src="https://github.com/user-attachments/assets/1785fb74-edbd-4ec0-9b82-56b3081090b1" />
+<img width="1918" height="962" alt="image" src="https://github.com/user-attachments/assets/01a5ee4f-b4e6-4a6e-aeab-abed0a3a3418" />
+<img width="1918" height="953" alt="image" src="https://github.com/user-attachments/assets/da8bb9bb-97e5-4e61-8296-6ae5d92b25e4" />
+<img width="1918" height="951" alt="image" src="https://github.com/user-attachments/assets/3f30a5c7-063d-4bcc-9314-d9e236e77a2a" />
+<img width="1918" height="952" alt="image" src="https://github.com/user-attachments/assets/b0ae0280-6809-47ae-bbff-97ecf58c0962" />
+<img width="1918" height="976" alt="image" src="https://github.com/user-attachments/assets/d5f919ff-be61-4f1e-8be5-dabed3fab941" />
+
+# Grafana
+<img width="1916" height="972" alt="image" src="https://github.com/user-attachments/assets/a2f28550-d3f3-40c0-ac27-4cf5b5a6d983" />
+<img width="1918" height="973" alt="image" src="https://github.com/user-attachments/assets/3d832108-03b3-4356-b7ed-4c636286816f" />
+<img width="1918" height="965" alt="image" src="https://github.com/user-attachments/assets/5b318bb5-cfc4-40d9-8d93-0438b741a6f1" />
+<img width="1918" height="965" alt="image" src="https://github.com/user-attachments/assets/103804cf-dcb0-4f27-a06b-b6adc6ac7c34" />
+<img width="1916" height="980" alt="image" src="https://github.com/user-attachments/assets/045d1ffe-4ede-4f04-9699-718dee8688fd" />
+<img width="1918" height="976" alt="image" src="https://github.com/user-attachments/assets/d73c771e-20ba-4c1b-932c-1206bf692556" />
+<img width="1918" height="968" alt="image" src="https://github.com/user-attachments/assets/a4e4ae75-8fd8-4cc2-9cbd-8ef4e3137b57" />
+<img width="1918" height="977" alt="image" src="https://github.com/user-attachments/assets/37f3f84f-a729-4e24-bc29-f536684002f9" />
+<img width="1912" height="972" alt="image" src="https://github.com/user-attachments/assets/d5665aee-5185-4218-9fca-91933cafe3d6" />
+
+
+# Alertmanager
+<img width="1918" height="968" alt="image" src="https://github.com/user-attachments/assets/cdff28b1-85a2-4ec7-a97e-5086025e4d12" />
 
 ---
 
