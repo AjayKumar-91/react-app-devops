@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        BRANCH = "${env.BRANCH_NAME}"
-    }
-
     stages {
 
         stage('Checkout Code') {
@@ -14,9 +10,17 @@ pipeline {
             }
         }
 
-        stage('Show Branch') {
+        stage('Get Branch Name') {
             steps {
-                echo "Current Branch: ${BRANCH}"
+                script {
+
+                    env.BRANCH = sh(
+                        script: "git rev-parse --abbrev-ref HEAD",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Current Branch: ${env.BRANCH}"
+                }
             }
         }
 
@@ -45,13 +49,13 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "./build.sh ${BRANCH} ${BUILD_NUMBER}"
+                sh "./build.sh ${env.BRANCH} ${BUILD_NUMBER}"
             }
         }
 
         stage('Deploy Application') {
             steps {
-                sh "./deploy.sh ${BRANCH} ${BUILD_NUMBER}"
+                sh "./deploy.sh ${env.BRANCH} ${BUILD_NUMBER}"
             }
         }
     }
