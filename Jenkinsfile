@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        BRANCH = "master"
+        BRANCH = "${env.BRANCH_NAME}"
     }
 
     stages {
@@ -10,9 +10,13 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 deleteDir()
+                checkout scm
+            }
+        }
 
-                git branch: "${BRANCH}",
-                url: 'https://github.com/AjayKumar-91/react-app-devops.git'
+        stage('Show Branch') {
+            steps {
+                echo "Current Branch: ${BRANCH}"
             }
         }
 
@@ -49,6 +53,21 @@ pipeline {
             steps {
                 sh "./deploy.sh ${BRANCH} ${BUILD_NUMBER}"
             }
+        }
+    }
+
+    post {
+
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+
+        failure {
+            echo 'Pipeline failed!'
+        }
+
+        always {
+            sh 'docker image prune -f'
         }
     }
 }
